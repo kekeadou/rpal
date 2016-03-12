@@ -2,7 +2,7 @@
 #define _CONSTANT_H_
 
 // LEXICAL
-const int REMOVE = 0;
+const int REMOVE = -1;
 const int ID = 1;
 const int STRING = 2;
 const int CONDITIONAL = 3;
@@ -53,4 +53,5 @@ const int EQUALS = 43;
 const int FCN_FORM = 44;
 const int EMPTY_PAREN = 45;
 const int VLIST = 46;
+
 #endif

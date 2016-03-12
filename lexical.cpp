@@ -1,9 +1,66 @@
-#include "constant.h"
-#include "lexical.h"
+#include <map>
+#include <string>
 #include <fstream>
 #include <iostream>
 
+#include "constant.h"
+#include "lexical.h"
+
 using namespace std;
+
+const map<string, int>::value_type id_init_value[] =
+{
+    map<string, int>::value_type("let", LET),
+    map<string, int>::value_type("in", IN),
+    map<string, int>::value_type("lambda", LAMBDA),
+    map<string, int>::value_type("fn", FN),
+    map<string, int>::value_type("where", WHERE),
+    map<string, int>::value_type("tau", TAU),
+    map<string, int>::value_type("aug", AUG),
+    map<string, int>::value_type("or", OR),
+    map<string, int>::value_type("not", NOT),
+    map<string, int>::value_type("gr", GR),
+    map<string, int>::value_type("ge", GE),
+    map<string, int>::value_type("ls", LS),
+    map<string, int>::value_type("le", LE),
+    map<string, int>::value_type("eq", EQ),
+    map<string, int>::value_type("ne", NE),
+    map<string, int>::value_type("neg", NEG),
+    map<string, int>::value_type("true", TRUE),
+    map<string, int>::value_type("false", FALSE),
+    map<string, int>::value_type("nil", NIL),
+    map<string, int>::value_type("dummy", DUMMY),
+    map<string, int>::value_type("within", WITHIN),
+    map<string, int>::value_type("and", AND2),
+    map<string, int>::value_type("rec", REC),
+};
+
+map<string, int> id_name_type_mappings(id_init_value, id_init_value + sizeof(id_init_value)/sizeof(id_init_value[0]));
+
+
+const map<string, int>::value_type oper_init_value[] =
+{
+    map<string, int>::value_type(".", PERIOD),
+    map<string, int>::value_type("&", AND),
+    map<string, int>::value_type("+", ADD),
+    map<string, int>::value_type("-", SUB),
+    map<string, int>::value_type("*", STAR),
+    map<string, int>::value_type("/", DEVIDE),
+    map<string, int>::value_type("@", AT_),
+    map<string, int>::value_type("|", BAR),
+    map<string, int>::value_type("=", EQUALS),
+    map<string, int>::value_type("->", CONDITIONAL),
+    map<string, int>::value_type("**", TSTAR),
+    map<string, int>::value_type(">=", GE),
+    map<string, int>::value_type("<=", LE),
+};
+
+map<string, int> oper_name_type_mappings(oper_init_value, oper_init_value + sizeof(oper_init_value)/sizeof(oper_init_value[0]));
+
+int get_value_or_default(map<string, int> m, string key, int default_value) {
+    if(m.find(key) == m.end()) return default_value;
+    return m[key];
+}
 
 int isoperator(char t){
     return  string("\"+-*<>&.@/:=~|$!#%^_[]{}`?").find(t) != string::npos;
@@ -45,7 +102,7 @@ void LexicalAnalyzer::tokenize() {
     Token* cur;
     while(getline(input, line)) {
         if(print_list)
-            cout << line << " ";
+            cout << line << endl;
         line_num++;
         //cout << line_num << " " << endl;
 
@@ -62,15 +119,19 @@ void LexicalAnalyzer::tokenize() {
                 //cout << "--" << i << " " << p_token->name << endl;
                 //cout << p_token->name << " " << endl;
                 i += p_token->name.length();
-                p_token = new Token();
-                cur->next = p_token;
+                if (i >= line.length()){
+                    cur->next = NULL;
+                }
+                else {
+                    p_token = new Token();
+                    cur->next = p_token;
+                }
             }
             else {
                 cout << "Parse Error at line: " << line_num << endl;
                 exit(-1);
             }
         }
-        cout << endl;
     }
     do_remove();
     do_print();
@@ -91,8 +152,8 @@ int LexicalAnalyzer::cut_identifier(int start, string line, Token* p_token) {
     int end=start;
     if(isalpha(line[end++])){
         while(isalnum(line[end]) || line[end] == '_') end++;
-        p_token->type = ID;
         p_token->name = line.substr(start, end-start);
+        p_token->type = get_value_or_default(id_name_type_mappings, p_token->name, ID);
         return 1;
     }
     return 0;
@@ -207,17 +268,14 @@ void LexicalAnalyzer::do_remove(){
             cur->next = remove->next;
             free(remove);
         } 
-        if (cur != NULL)
-            cout << cur->type << " " << cur->name << endl; 
-            cur = cur->next;
+        cur = cur->next;
     }
-    cout << "end";
 }
 
 void LexicalAnalyzer::do_print(){
     Token* cur = head;
     while(cur != NULL) {
-        cout << cur->type << " " << cur->name << endl; 
+        cout << "type: " << cur->type << " name: " << cur->name << endl;
         cur = cur->next;
     }
 }

@@ -173,6 +173,8 @@ void SyntaxAnalyzer::EW(){
 //  -> ’fn’ Vb+ ’.’ E => ’lambda’
 //  -> Ew;
 void SyntaxAnalyzer::E(){
+    cout << cur->type << endl;
+    cout << LET << endl;
     if (cur->type == LET) {
         forward();
         D();
@@ -181,6 +183,7 @@ void SyntaxAnalyzer::E(){
         forward();
         E();
         build_subtree(LET, 2);
+        debug();
         return;
     }
     if (cur->type == FN) {
@@ -419,6 +422,7 @@ void SyntaxAnalyzer::R(){
 void SyntaxAnalyzer::build_ast(){
     E();
     if (cur->next != NULL){
+        cout << cur->type << "-" << cur->name << "-" << endl;
         error_exit("can not parse tokens totally.");
     }
 
@@ -429,6 +433,11 @@ void SyntaxAnalyzer::build_ast(){
 
 void print_n_dots(int n){
     while(n--) cout << ".";
+}
+
+void SyntaxAnalyzer::debug(){
+    cout << cur->type << "-" << "-" <<cur->name << endl;
+    print_stack();
 }
 
 void SyntaxAnalyzer::print_stack(){

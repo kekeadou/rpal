@@ -1,10 +1,10 @@
 #ifndef _SYNTAX_H_
 #define _SYNTAX_H_
 
-#include <stack>
 #include "lexical.h"
 #include <stack>
 #include <list>
+#include <string>
 
 
 class Tree {
@@ -34,6 +34,7 @@ class SyntaxAnalyzer{
     public:
         void build_ast();
         void print_stack();
+        void debug();
 
     private:
         void forward();
