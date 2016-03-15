@@ -10,6 +10,7 @@ class Token{
         std::string name;
         Token* next;
         Token(): type(0), name(""), next(NULL){}
+        Token(int t, std::string n): type(t), name(n), next(NULL){}
 };
 
 

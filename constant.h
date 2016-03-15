@@ -3,6 +3,7 @@
 
 // LEXICAL
 const int REMOVE = -1;
+const int END_FLAG = 0;
 const int ID = 1;
 const int STRING = 2;
 const int CONDITIONAL = 3;

@@ -26,8 +26,8 @@ class SyntaxAnalyzer{
         int print_ast;
         int print_dots;
         std::stack<Tree*> st;
-        SyntaxAnalyzer(Token* t): cur(t), print_ast(0), print_dots(3)  {};
-        SyntaxAnalyzer(Token* t, int pa): cur(t), print_ast(pa), print_dots(3) {};
+        SyntaxAnalyzer(Token* t): cur(t), print_ast(0), print_dots(1)  {};
+        SyntaxAnalyzer(Token* t, int pa): cur(t), print_ast(pa), print_dots(1) {};
         SyntaxAnalyzer(Token* t, int pa, int pd): cur(t), print_ast(pa), print_dots(pd) {};
 
 

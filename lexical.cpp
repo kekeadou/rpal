@@ -119,13 +119,8 @@ void LexicalAnalyzer::tokenize() {
                 //cout << "--" << i << " " << p_token->name << endl;
                 //cout << p_token->name << " " << endl;
                 i += p_token->name.length();
-                if (i >= line.length()){
-                    cur->next = NULL;
-                }
-                else {
-                    p_token = new Token();
-                    cur->next = p_token;
-                }
+                p_token = new Token(END_FLAG, "end_flag");
+                cur->next = p_token; 
             }
             else {
                 cout << "Parse Error at line: " << line_num << endl;
@@ -214,16 +209,16 @@ int LexicalAnalyzer::cut_operator(int start, string line, Token* p_token) {
                           p_token->name = "->";
                           return 1;
                       }
-                      break;
             case '*': if(line[end+1] == '*') {
                           p_token->type = TSTAR;
                           p_token->name = "**";
                           return 1;
                       }
-                      break;
+            default : {
+                          p_token->name = line[end];
+                          p_token->type = get_value_or_default(oper_name_type_mappings, p_token->name, OP);
+                      }
         }
-        p_token->type = OP;
-        p_token->name = line[end];
         //cout << "it is an oper." << endl;
         return 1;
     }
@@ -233,7 +228,7 @@ int LexicalAnalyzer::cut_operator(int start, string line, Token* p_token) {
 int LexicalAnalyzer::cut_int(int start, string line, Token* p_token) {
     int end = start;
     if (isdigit(line[end++])){
-        while(isdigit(line[end++]));
+        while(isdigit(line[end])) end++;
         p_token->type = INTEGER;
         p_token->name = line.substr(start, end-start);
         //*p_p_token = end-start;

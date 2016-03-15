@@ -1,9 +1,57 @@
 #include "constant.h"
 #include "syntax.h"
 #include <iostream>
+#include <map>
 
 using namespace std;
 
+const map<int, string>::value_type init_value[] =
+{
+    map<int, string>::value_type(LET, "let"),
+    map<int, string>::value_type(IN, "in"),
+    map<int, string>::value_type(LAMBDA, "lambda"),
+    map<int, string>::value_type(FN, "fn"),
+    map<int, string>::value_type(WHERE, "where"),
+    map<int, string>::value_type(TAU, "tau"),
+    map<int, string>::value_type(AUG, "aug"),
+    map<int, string>::value_type(OR, "or"),
+    map<int, string>::value_type(NOT, "not"),
+    map<int, string>::value_type(GR, "gr"),
+    map<int, string>::value_type(GE, "ge"),
+    map<int, string>::value_type(LS, "ls"),
+    map<int, string>::value_type(LE, "le"),
+    map<int, string>::value_type(EQ, "eq"),
+    map<int, string>::value_type(NE, "ne"),
+    map<int, string>::value_type(NEG, "neg"),
+    map<int, string>::value_type(TRUE, "true"),
+    map<int, string>::value_type(FALSE, "false"),
+    map<int, string>::value_type(NIL, "nil"),
+    map<int, string>::value_type(DUMMY, "dummy"),
+    map<int, string>::value_type(WITHIN, "within"),
+    map<int, string>::value_type(AND2, "and"),
+    map<int, string>::value_type(REC, "rec"),
+    map<int, string>::value_type(PERIOD, "."),
+    map<int, string>::value_type(AND, "&"),
+    map<int, string>::value_type(ADD, "+"),
+    map<int, string>::value_type(SUB, "-"),
+    map<int, string>::value_type(STAR, "*"),
+    map<int, string>::value_type(DEVIDE, "/"),
+    map<int, string>::value_type(AT_, "@"),
+    map<int, string>::value_type(BAR, "|"),
+    map<int, string>::value_type(EQUALS, "="),
+    map<int, string>::value_type(CONDITIONAL, "->"),
+    map<int, string>::value_type(TSTAR, "**"),
+    map<int, string>::value_type(GAMMA, "gamma"),
+    map<int, string>::value_type(COMMA, ","),
+    map<int, string>::value_type(FCN_FORM, "fcn_form"),
+};
+
+map<int, string> type_name_mappings(init_value, init_value + sizeof(init_value)/sizeof(init_value[0]));
+
+string get_value_or_default(map<int, string> m, int key, string default_value) {
+    if(m.find(key) == m.end()) return default_value;
+    return m[key];
+}
 
 void SyntaxAnalyzer::forward(){
     cur = cur->next;
@@ -25,7 +73,8 @@ int is_type_binary(int type){
 }
 
 void SyntaxAnalyzer::build_subtree(int type, int num){
-    Tree* new_node = new Tree(type);
+    string name = get_value_or_default(type_name_mappings, type, "NO NAME");
+    Tree* new_node = new Tree(type, name);
     while(num--){
         new_node->lt.push_back(st.top());
         st.pop();
@@ -41,7 +90,7 @@ void error_exit(string error_info){
 
 //Vl -> ’<IDENTIFIER>’ list ’,’ => ’,’?;
 int SyntaxAnalyzer::VL() {
-    int n = 0;
+    int n = 1;
     if (cur->type == ID){
         push_stack_and_forward();
         while(cur->type==COMMA) {
@@ -51,7 +100,7 @@ int SyntaxAnalyzer::VL() {
             push_stack_and_forward();
             n++;
         }
-        if(n > 0) build_subtree(COMMA, n);
+        if(n > 1) build_subtree(COMMA, n);
         return 1;
     }
     return 0;
@@ -136,13 +185,13 @@ void SyntaxAnalyzer::DR(){
 //   -> Dr ;
 void SyntaxAnalyzer::DA(){
     DR();
-    int n = 0;
+    int n = 1;
     while (cur->type == AND2){
         forward();
         DR();
         n++;
     }
-    if(n > 0)
+    if(n > 1)
         build_subtree(AND2, n);
 }
 
@@ -173,8 +222,6 @@ void SyntaxAnalyzer::EW(){
 //  -> ’fn’ Vb+ ’.’ E => ’lambda’
 //  -> Ew;
 void SyntaxAnalyzer::E(){
-    cout << cur->type << endl;
-    cout << LET << endl;
     if (cur->type == LET) {
         forward();
         D();
@@ -183,7 +230,6 @@ void SyntaxAnalyzer::E(){
         forward();
         E();
         build_subtree(LET, 2);
-        debug();
         return;
     }
     if (cur->type == FN) {
@@ -370,7 +416,7 @@ void SyntaxAnalyzer::A(){
     while ((cur->type == ADD) or (cur->type == SUB)){
         int this_type = cur->type;
         forward();
-        AT();
+        A();
         build_subtree(this_type, 2);
     }
 }
@@ -394,7 +440,6 @@ int SyntaxAnalyzer::RN() {
         case DUMMY:{
             push_stack_and_forward();
             return 1;
-            break;
         }
         case L_PAREN:{
                 forward();
@@ -402,7 +447,6 @@ int SyntaxAnalyzer::RN() {
                 if(cur->type != R_PAREN) error_exit(") not find in RN");
                 forward();
                 return 1;
-                break;
             }
     }
     return 0;
@@ -436,18 +480,43 @@ void print_n_dots(int n){
 }
 
 void SyntaxAnalyzer::debug(){
-    cout << cur->type << "-" << "-" <<cur->name << endl;
+    cout << cur->type << " - " << cur->name << endl;
     print_stack();
 }
 
-void SyntaxAnalyzer::print_stack(){
-    while(!st.empty()){
-        Tree* ptree = st.top();
-        cout << ptree->type << ": ";
-        for(list<Tree*>::iterator it=ptree->lt.begin(); it != ptree->lt.end(); ++it){
-            print_n_dots(print_dots);
-            cout << (*it)->type << " " << (*it)->value << " " << (*it)->name << endl;
-        }
-        st.pop();
+string get_name(Tree* node){
+    string s;
+    switch (node->type){
+        case ID:
+            s = "<ID:" + node->name + ">";
+            break;
+        case INTEGER:
+            s = "<INT:" + node->name + ">";
+            break;
+        case STRING:
+            s = "<STR:" + node->name + ">";
+            break;
+        default:
+            s = node->name;
+    }
+    return s;
+}
+
+void print_tree(Tree* top, int depth, int per_dots){
+    print_n_dots(depth*per_dots);
+    string name = get_name(top);
+    //cout << name << " - " << top->type << endl;
+    cout << name << endl;
+
+    for(list<Tree*>::iterator it=top->lt.begin(); it != top->lt.end(); ++it){
+        print_tree((*it), depth+1, per_dots);
     }
 }
+
+void SyntaxAnalyzer::print_stack(){
+    Tree* top = st.top();
+    //cout << top->name << " - " << endl;
+    print_tree(top, 0, print_dots);
+    st.pop();
+}
+
