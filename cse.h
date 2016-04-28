@@ -59,7 +59,7 @@ class CSE {
         Control* head;
         Item* gen_control_struct(Tree* st, int index, Control* tmp);
         void eval(Tree* st);
-        Environ* cse_engine(Control* head);
+        Environ* rule_engine(Control* head);
         
         void rule_1(Item* c_head, Item** s_head);
         void rule_2(Item* c_head, Item** s_head);
@@ -71,7 +71,6 @@ class CSE {
         void rule_9(Item* c_head, Item** s_head);
 
 };
-
 
 
 #endif

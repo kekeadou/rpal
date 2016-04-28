@@ -31,18 +31,18 @@ Item* CSE::gen_control_struct(Tree* st, int i, Control* cur){
     return NULL;
 }
 
-Item* make_env(Environ* x){
+Item* new_env(Environ* x){
     Item* tmp = new Item();
     tmp->val.epsilon = x;
     return tmp;
 }
 
-Environ* CSE::cse_engine(Control* head){
+Environ* CSE::rule_engine(Control* head){
      Environ* e_head=new Environ(0,NULL,NULL,NULL); 
      int env = 0;
      Item *c_head, *control, *s_head;
-     c_head = control = make_env(e_head);
-     s_head = make_env(e_head);
+     c_head = control = new_env(e_head);
+     s_head = new_env(e_head);
      control->next = head->delta;
 
      while(control->next != NULL) control = control->next;
@@ -67,5 +67,5 @@ void CSE::eval(Tree* st){
     Control* head = new Control(0);
     Control* cur = head;
     head->delta = gen_control_struct(st, 0, cur);
-    Environ* e->head = cse_engine(head);
+    Environ* e->head = rule_engine(head);
 }
