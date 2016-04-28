@@ -519,6 +519,20 @@ void standerdize_node(Tree* node){
                 cout << node->child->child->name << node->child->child->sibling->name << endl;
                 break; 
             }
+        case WITHIN: {
+           if( !((node->child->type==EQUALS) &&
+                (node->child->sibling->type==EQUALS))) break; 
+            Tree* E2 = node->child->sibling->child->sibling;
+            Tree* X2 = node->child->sibling->child;
+            node->child->sibling->child = new Tree(0);
+            node->child->sibling->child->sibling = node->child->child->sibling;
+            node->child = X2;
+            node->child->sibling->child->child->sibling = E2;
+            node->type = EQUALS;
+            node->child->sibling->type = GAMMA;
+            node->child->sibling->child->type = LAMBDA;
+            break;
+            }
     }
 
 }
