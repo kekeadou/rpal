@@ -5,34 +5,27 @@
 #include <stack>
 #include <list>
 #include <string>
-
-
-class Tree {
-    public:
-        int type;
-        int value;
-        std::string name;
-        std::list<Tree*> lt;
-        Tree(int t): type(t), value(0), name(""){};
-        Tree(int t, std::string n): type(t), value(0), name(n){};
-        Tree(int t, int v, std::string n): type(t),value(v),name(n){};
-};
+#include "tree.h"
 
 
 class SyntaxAnalyzer{
+    private:
+        Token* cur;
 
     public:
-        Token* cur;
         int print_ast;
+        int print_st;
         int print_dots;
         std::stack<Tree*> st;
-        SyntaxAnalyzer(Token* t): cur(t), print_ast(0), print_dots(1)  {};
-        SyntaxAnalyzer(Token* t, int pa): cur(t), print_ast(pa), print_dots(1) {};
-        SyntaxAnalyzer(Token* t, int pa, int pd): cur(t), print_ast(pa), print_dots(pd) {};
+        SyntaxAnalyzer(Token* t): cur(t), print_ast(0), print_st(0),  print_dots(1)  {};
+        SyntaxAnalyzer(Token* t, int pa): cur(t), print_ast(pa), print_st(0), print_dots(1) {};
+        SyntaxAnalyzer(Token* t, int pa, int ps): cur(t), print_ast(pa), print_st(ps), print_dots(1) {};
+        SyntaxAnalyzer(Token* t, int pa, int ps, int pd): cur(t), print_ast(pa), print_st(ps), print_dots(pd) {};
 
 
     public:
         void build_ast();
+        void standerdize();
         void print_stack();
         void debug();
 

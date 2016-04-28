@@ -129,7 +129,8 @@ void LexicalAnalyzer::tokenize() {
         }
     }
     do_remove();
-    do_print();
+    if (print_list)
+        do_print();
 }
 
 int LexicalAnalyzer::cut_space(int start, string line, Token* p_token){

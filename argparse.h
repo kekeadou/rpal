@@ -11,6 +11,7 @@ class ArgParse{
     public:
         int print_list;
         int print_ast;
+        int print_st;
         int print_none;
         std::string file_path;
 };

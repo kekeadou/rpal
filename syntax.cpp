@@ -75,9 +75,22 @@ int is_type_binary(int type){
 void SyntaxAnalyzer::build_subtree(int type, int num){
     string name = get_value_or_default(type_name_mappings, type, "NO NAME");
     Tree* new_node = new Tree(type, name);
-    while(num--){
-        new_node->lt.push_back(st.top());
+
+    stack<Tree*> help_stack;
+    for (int i=0; i<num; i++){
+        help_stack.push(st.top());
         st.pop();
+    }
+
+    new_node->child = help_stack.top();
+    help_stack.pop();
+    num--;
+
+    Tree* cur_node = new_node->child;
+    while(num--){
+        cur_node->sibling = help_stack.top();
+        help_stack.pop();
+        cur_node = cur_node->sibling;
     }
     st.push(new_node);
 }
@@ -475,8 +488,55 @@ void SyntaxAnalyzer::build_ast(){
     }
 }
 
-void print_n_dots(int n){
-    while(n--) cout << ".";
+void standerdize_node(Tree* node){
+    switch (node->type) {
+        case LET:
+            {
+                if (node->child->type != EQUALS) break;
+                Tree* tmp = node->child->child->sibling;
+                node->child->child->sibling = node->child->sibling;
+                node->child->sibling = tmp;
+                node->child->type=LAMBDA;
+                node->child->name="lambda";
+                node->type=GAMMA;
+                node->name="gamma";
+                break;
+            }
+        case WHERE:
+            {
+                cout << node->child->child->name << endl;
+                if(node->child->sibling->type != EQUALS) break;
+                Tree* P = node->child;
+                Tree* E = node->child->sibling->child->sibling;
+                node->child->sibling->child->sibling = P;
+                node->child = node->child->sibling;
+                node->child->sibling = E;
+                node->child->type=LAMBDA;
+                node->child->name="lambda";
+                node->type=GAMMA;
+                node->name="gamma";
+                cout << node->child->name << node->child->sibling->name << endl;
+                cout << node->child->child->name << node->child->child->sibling->name << endl;
+                break; 
+            }
+    }
+
+}
+
+void do_standerdize(Tree* top){
+    if (!top) return;
+    standerdize_node(top);
+    if (top->child) do_standerdize(top->child);
+    if (top->sibling) do_standerdize(top->sibling);
+}
+
+void SyntaxAnalyzer::standerdize(){
+    Tree* top = st.top();
+    do_standerdize(top);
+
+    if (print_st){
+        print_stack(); 
+    }
 }
 
 void SyntaxAnalyzer::debug(){
@@ -484,39 +544,10 @@ void SyntaxAnalyzer::debug(){
     print_stack();
 }
 
-string get_name(Tree* node){
-    string s;
-    switch (node->type){
-        case ID:
-            s = "<ID:" + node->name + ">";
-            break;
-        case INTEGER:
-            s = "<INT:" + node->name + ">";
-            break;
-        case STRING:
-            s = "<STR:" + node->name + ">";
-            break;
-        default:
-            s = node->name;
-    }
-    return s;
-}
-
-void print_tree(Tree* top, int depth, int per_dots){
-    print_n_dots(depth*per_dots);
-    string name = get_name(top);
-    //cout << name << " - " << top->type << endl;
-    cout << name << endl;
-
-    for(list<Tree*>::iterator it=top->lt.begin(); it != top->lt.end(); ++it){
-        print_tree((*it), depth+1, per_dots);
-    }
-}
-
 void SyntaxAnalyzer::print_stack(){
     Tree* top = st.top();
     //cout << top->name << " - " << endl;
-    print_tree(top, 0, print_dots);
-    st.pop();
+    print_tree(top, print_dots);
+    //st.pop();
 }
 
