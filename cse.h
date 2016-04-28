@@ -63,7 +63,7 @@ class CSE {
         
         void rule_1(Item* c_head, Item** s_head);
         void rule_2(Item* c_head, Item** s_head);
-        void rule_3(Item* c_head, Item** s_head, Environ* env);
+        void rule_3(Item* c_head, Item** s_head, int* env);
         void rule_5(Item* c_head, Item** s_head);
         void rule_6(Item* c_head, Item** s_head);
         void rule_7(Item* c_head, Item** s_head);

@@ -2,28 +2,6 @@
 #include "constant.h"
 
 
-void CSE::generate_control_structs(Tree* st){
-    if (st == NULL) return;
-    int k = 0;
-    Item* item = new Item();
-    head = new Control(0);
-    switch (st->type){
-        case GAMMA: {
-            item->type = GAMMA;
-            head->delta.push_back(item);
-            break;
-            }
-       case LAMBDA: {
-            k++;
-            item->type = LAMBDA;
-            item->val.l = new leta(k, st->child);
-            c0->delta.push_back(item);
-            break;
-            }
-
-    }
-}
-
 Item* CSE::gen_control_struct(Tree* st, int i, Control* cur){
     if (st == NULL) return NULL;
     Item* m = new Item();
@@ -50,7 +28,7 @@ Item* CSE::gen_control_struct(Tree* st, int i, Control* cur){
             return m;
             }
     }
-
+    return NULL;
 }
 
 Item* make_env(Environ* x){
@@ -61,6 +39,7 @@ Item* make_env(Environ* x){
 
 Environ* CSE::cse_engine(Control* head){
      Environ* e_head=new Environ(0,NULL,NULL,NULL); 
+     int env = 0;
      Item *c_head, *control, *s_head;
      c_head = control = make_env(e_head);
      s_head = make_env(e_head);
@@ -71,7 +50,7 @@ Environ* CSE::cse_engine(Control* head){
         case TUPLE:
         case GENERAL: rule_1(c_head,&s_head); break;
         case LAMBDA: rule_2(c_head,&s_head); break;
-        case GAMMA: rule_3_etc(c_head,&s_head,d_head,&enviro); 
+        case GAMMA: rule_3(c_head,&s_head,d_head,&env); 
             break;
         case ENVIRO: rule_5(c_head,&s_head);break;
         case BINOPA: 
@@ -89,5 +68,4 @@ void CSE::eval(Tree* st){
     Control* cur = head;
     head->delta = gen_control_struct(st, 0, cur);
     Environ* e->head = cse_engine(head);
-
 }
